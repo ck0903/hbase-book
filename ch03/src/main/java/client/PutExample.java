@@ -20,9 +20,11 @@ public class PutExample {
 
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create(); // co PutExample-1-CreateConf Create the required configuration.
-
+    //设置zookeerper 客户端的地址，否则可能出现无法访问Hbase 服务的情况。
+    //也可以直接把hbase-site.xml 放在resources 目录下。
+    //conf.set("hbase.zookeeper.quorum","master,slave1,slave2"); //
     // ^^ PutExample
-    HBaseHelper helper = HBaseHelper.getHelper(conf);
+    HBaseHelper helper = HBaseHelper.getHelper(conf);  //HBaseHelper 一个封装好的工具类，
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1");
     // vv PutExample
