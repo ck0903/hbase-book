@@ -26,12 +26,13 @@ public class PutTestSuite {
         Configuration conf = HBaseConfiguration.create();
         Connection conn = ConnectionFactory.createConnection(conf);
         Table table = conn.getTable(TableName.valueOf("test"));
+        //System.out.println(table);
         Put put = new Put(Bytes.toBytes("row4"));
         put.addColumn(Bytes.toBytes("cf"),Bytes.toBytes("name"),Bytes.toBytes("xiaoming"));
         put.addColumn(Bytes.toBytes("cf"),Bytes.toBytes("age"),Bytes.toBytes("18"));
+        //System.out.println(put);
         table.put(put);
         table.close();
         conn.close();
-
     }
 }

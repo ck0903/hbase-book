@@ -25,36 +25,44 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 /**
  * Used by the book examples to generate tables and fill them with test data.
+ * 工具类，用于抽象一些公用的操作。
  */
 public class HBaseHelper implements Closeable {
 
-  private Configuration configuration = null;
-  private Connection connection = null;
-  private Admin admin = null;
+  private Configuration configuration = null;// Configuraton 对象，包含hbase 和Spark集群的配置情况。
+  private Connection connection = null;  // 用于连接hbase 数据库。
+  private Admin admin = null;  // Hbase 的管理员账户，
 
   protected HBaseHelper(Configuration configuration) throws IOException {
     this.configuration = configuration;
-    this.connection = ConnectionFactory.createConnection(configuration);
-    this.admin = connection.getAdmin();
+    this.connection = ConnectionFactory.createConnection(configuration);  // 建立连接对象
+    this.admin = connection.getAdmin();  // 获取管理员对象。
   }
 
+  // 对外提供接口，返回一个HbaseHelper 对象，里面封装了多个的方法，用于操作Hbase 数据库。
   public static HBaseHelper getHelper(Configuration configuration) throws IOException {
     return new HBaseHelper(configuration);
   }
 
+
+
+  // 关闭数据库连接
   @Override
   public void close() throws IOException {
     connection.close();
   }
 
+  //getter
   public Connection getConnection() {
     return connection;
   }
 
+  // getter
   public Configuration getConfiguration() {
     return configuration;
   }
 
+  // 创建名空间
   public void createNamespace(String namespace) {
     try {
       NamespaceDescriptor nd = NamespaceDescriptor.create(namespace).build();
@@ -64,6 +72,7 @@ public class HBaseHelper implements Closeable {
     }
   }
 
+  // 删除命名空间，首先需要删除命名空间下的数据表
   public void dropNamespace(String namespace, boolean force) {
     try {
       if (force) {
@@ -83,21 +92,45 @@ public class HBaseHelper implements Closeable {
     }
   }
 
+  /**
+   * 判断Tabel 是否存在
+   * @param table
+   * @return
+   * @throws IOException
+   */
   public boolean existsTable(String table)
   throws IOException {
     return existsTable(TableName.valueOf(table));
   }
 
+  /**
+   * 判断Tabel是否存在
+   * @param table
+   * @return
+   * @throws IOException
+   */
   public boolean existsTable(TableName table)
   throws IOException {
     return admin.tableExists(table);
   }
 
+  /**
+   * 创建表格
+   * @param table
+   * @param colfams
+   * @throws IOException
+   */
   public void createTable(String table, String... colfams)
   throws IOException {
     createTable(TableName.valueOf(table), 1, null, colfams);
   }
 
+  /**
+   * 建表
+   * @param table
+   * @param colfams
+   * @throws IOException
+   */
   public void createTable(TableName table, String... colfams)
   throws IOException {
     createTable(table, 1, null, colfams);
