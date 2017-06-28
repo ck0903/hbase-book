@@ -15,6 +15,7 @@ import util.HBaseHelper;
 
 import java.io.IOException;
 
+// Done 这个主要是验证存放数据后，是否是真的把数据插入到了数据库里面
 public class PutIdenticalExample {
 
   public static void main(String[] args) throws IOException {

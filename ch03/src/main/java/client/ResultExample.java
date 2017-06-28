@@ -18,6 +18,7 @@ import util.HBaseHelper;
 
 public class ResultExample {
 
+  // Result 的一些用法
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
 

@@ -16,6 +16,7 @@ import util.HBaseHelper;
 
 import java.io.IOException;
 
+// Done
 public class PutExample {
 
   public static void main(String[] args) throws IOException {

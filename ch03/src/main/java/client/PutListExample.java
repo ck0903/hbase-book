@@ -18,6 +18,7 @@ import util.HBaseHelper;
 
 public class PutListExample {
 
+  // 往里面插入整列的值
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
 

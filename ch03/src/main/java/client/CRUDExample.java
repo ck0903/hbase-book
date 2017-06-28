@@ -34,6 +34,7 @@ public class CRUDExample {
       Connection connection = ConnectionFactory.createConnection(conf);
       Table table = connection.getTable(TableName.valueOf("testtable"));
     ) {
+      // 添加
       Put put = new Put(Bytes.toBytes("row1"));
       put.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
         Bytes.toBytes("val1"));
@@ -41,6 +42,7 @@ public class CRUDExample {
         Bytes.toBytes("val2"));
       table.put(put);
 
+      // 使用Scan 查询
       Scan scan = new Scan();
       ResultScanner scanner = table.getScanner(scan);
       for (Result result2 : scanner) {
@@ -48,6 +50,7 @@ public class CRUDExample {
           System.out.println("Cell: " + result2.current());
       }
 
+      // 使用Get 查询
       Get get = new Get(Bytes.toBytes("row1"));
       get.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"));
       Result result = table.get(get);
@@ -56,10 +59,12 @@ public class CRUDExample {
         Bytes.toBytes("qual1"));
       System.out.println("Value only: " + Bytes.toString(val));
 
+      // 删除数据
       Delete delete = new Delete(Bytes.toBytes("row1"));
       delete.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"));
       table.delete(delete);
 
+      // 使用scanner查询
       Scan scan2 = new Scan();
       ResultScanner scanner2 = table.getScanner(scan2);
       for (Result result2 : scanner2) {

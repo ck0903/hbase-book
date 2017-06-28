@@ -43,8 +43,10 @@ public class PutListErrorExample2 {
     put3.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual2"),
       Bytes.toBytes("val3"));
     puts.add(put3);
+    // 不允许插入空的记录
     /*[*/Put put4 = new Put(Bytes.toBytes("row2"));
     puts.add(put4);/*]*/ // co PutListErrorExample2-1-AddErrorPut Add put with no content at all to list.
+
 
     /*[*/try {/*]*/
       table.put(puts);

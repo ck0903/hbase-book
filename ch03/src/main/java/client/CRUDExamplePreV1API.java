@@ -18,6 +18,7 @@ import util.HBaseHelper;
 @SuppressWarnings("deprecation") // because of old API usage
 public class CRUDExamplePreV1API {
 
+  // 旧版本的API
   public static void main(String[] args) throws IOException {
     // vv CRUDExamplePreV1API
     Configuration conf = HBaseConfiguration.create();

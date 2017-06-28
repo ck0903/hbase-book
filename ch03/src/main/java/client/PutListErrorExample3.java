@@ -19,6 +19,7 @@ import util.HBaseHelper;
 
 public class PutListErrorExample3 {
 
+  // 如果出错，后续可以检测到哪里出的错，以及可以打印出错的信息
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
     try (

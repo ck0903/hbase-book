@@ -29,12 +29,12 @@ import org.apache.hadoop.hbase.util.Bytes;
  */
 public class HBaseHelper implements Closeable {
 
-  private Configuration configuration = null;// Configuraton 对象，包含hbase 和Spark集群的配置情况。
+  private Configuration configuration = null;// Configuraton 对象，包含hbase 集群的配置情况。
   private Connection connection = null;  // 用于连接hbase 数据库。
   private Admin admin = null;  // Hbase 的管理员账户，
 
   protected HBaseHelper(Configuration configuration) throws IOException {
-    this.configuration = configuration;
+    this.configuration = configuration; // 获取配置情况
     this.connection = ConnectionFactory.createConnection(configuration);  // 建立连接对象
     this.admin = connection.getAdmin();  // 获取管理员对象。
   }
@@ -92,65 +92,49 @@ public class HBaseHelper implements Closeable {
     }
   }
 
-  /**
-   * 判断Tabel 是否存在
-   * @param table
-   * @return
-   * @throws IOException
-   */
+  // 判断表格是否存在
   public boolean existsTable(String table)
   throws IOException {
     return existsTable(TableName.valueOf(table));
   }
 
-  /**
-   * 判断Tabel是否存在
-   * @param table
-   * @return
-   * @throws IOException
-   */
+  // 判断表格是否存在
   public boolean existsTable(TableName table)
   throws IOException {
     return admin.tableExists(table);
   }
 
-  /**
-   * 创建表格
-   * @param table
-   * @param colfams
-   * @throws IOException
-   */
+  // 创建表格，其中String... colfams 表示的是参数的个数可以是1个，或者多个。
   public void createTable(String table, String... colfams)
   throws IOException {
     createTable(TableName.valueOf(table), 1, null, colfams);
   }
 
-  /**
-   * 建表
-   * @param table
-   * @param colfams
-   * @throws IOException
-   */
+  // 创建表格
   public void createTable(TableName table, String... colfams)
   throws IOException {
     createTable(table, 1, null, colfams);
   }
 
+  // 创建表格
   public void createTable(String table, int maxVersions, String... colfams)
   throws IOException {
     createTable(TableName.valueOf(table), maxVersions, null, colfams);
   }
 
+  // 创建表格
   public void createTable(TableName table, int maxVersions, String... colfams)
   throws IOException {
     createTable(table, maxVersions, null, colfams);
   }
 
+  // 创建表格
   public void createTable(String table, byte[][] splitKeys, String... colfams)
   throws IOException {
     createTable(TableName.valueOf(table), 1, splitKeys, colfams);
   }
 
+  // 创建表格
   public void createTable(TableName table, int maxVersions, byte[][] splitKeys,
     String... colfams)
   throws IOException {
@@ -167,18 +151,22 @@ public class HBaseHelper implements Closeable {
     }
   }
 
+  // 禁用表格
   public void disableTable(String table) throws IOException {
     disableTable(TableName.valueOf(table));
   }
 
+  // 禁用表格
   public void disableTable(TableName table) throws IOException {
     admin.disableTable(table);
   }
 
+  // 删除表格
   public void dropTable(String table) throws IOException {
     dropTable(TableName.valueOf(table));
   }
 
+  // 删除表格
   public void dropTable(TableName table) throws IOException {
     if (existsTable(table)) {
       if (admin.isTableEnabled(table)) disableTable(table);
@@ -186,6 +174,7 @@ public class HBaseHelper implements Closeable {
     }
   }
 
+  //
   public void fillTable(String table, int startRow, int endRow, int numCols,
                         String... colfams)
   throws IOException {
@@ -350,9 +339,9 @@ public class HBaseHelper implements Closeable {
 
   public void put(TableName table, String[] rows, String[] fams, String[] quals,
                   long[] ts, String[] vals) throws IOException {
-    Table tbl = connection.getTable(table);
+    Table tbl = connection.getTable(table);//
     for (String row : rows) {
-      Put put = new Put(Bytes.toBytes(row));
+      Put put = new Put(Bytes.toBytes(row));//
       for (String fam : fams) {
         int v = 0;
         for (String qual : quals) {
