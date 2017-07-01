@@ -24,6 +24,7 @@ import util.HBaseHelper;
 
 public class RowFilterExample {
 
+  //Done
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
 
@@ -31,6 +32,7 @@ public class RowFilterExample {
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1", "colfam2");
     System.out.println("Adding rows to table...");
+    // 创建一个数据模型，数据是100行，两个列族，每个列族里面，每个列的值类似1-100 的随机值
     helper.fillTable("testtable", 1, 100, 100, "colfam1", "colfam2");
 
     Connection connection = ConnectionFactory.createConnection(conf);
@@ -75,5 +77,6 @@ public class RowFilterExample {
     }
     scanner3.close();
     // ^^ RowFilterExample
+    connection.close();
   }
 }

@@ -15,8 +15,11 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import util.HBaseHelper;
 
+// Done
 public class GetExample {
 
+
+  //  简单的的Get
   public static void main(String[] args) throws IOException {
     // vv GetExample
     Configuration conf = HBaseConfiguration.create(); // co GetExample-1-CreateConf Create the configuration.

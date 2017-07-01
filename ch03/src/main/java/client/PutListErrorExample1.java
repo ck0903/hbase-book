@@ -16,7 +16,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import util.HBaseHelper;
 
-// 往列族中插入的数据，如果这一个列族不存在，则会报错，
+// Done 往列族中插入的数据，如果这一个列族不存在，则会报错，
 public class PutListErrorExample1 {
 
   public static void main(String[] args) throws IOException {

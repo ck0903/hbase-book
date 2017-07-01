@@ -14,6 +14,7 @@ import util.HBaseHelper;
 
 import java.io.IOException;
 
+
 public class AppendExample {
 
   public static void main(String[] args) throws IOException {

@@ -15,7 +15,7 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import util.HBaseHelper;
-
+//Done
 public class ResultExample {
 
   // Result 的一些用法

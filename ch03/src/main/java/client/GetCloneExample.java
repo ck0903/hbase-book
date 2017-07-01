@@ -15,6 +15,8 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import util.HBaseHelper;
 
+//Done
+// Get 构造函数里面传入一个Get 的值
 public class GetCloneExample {
 
   public static void main(String[] args) throws IOException {

@@ -16,6 +16,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import util.HBaseHelper;
 
+//Done
 public class PutListExample {
 
   // 往里面插入整列的值

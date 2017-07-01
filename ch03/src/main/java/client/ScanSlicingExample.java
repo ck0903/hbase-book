@@ -18,6 +18,7 @@ import util.HBaseHelper;
 
 public class ScanSlicingExample {
 
+
   private static Table table = null;
 
   // vv ScanSlicingExample

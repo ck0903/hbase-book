@@ -14,7 +14,9 @@ import util.HBaseHelper;
 
 import java.io.IOException;
 
+// Done 自动释放资源
 public class GetTryWithResourcesExample {
+
 
   public static void main(String[] args) throws IOException {
     // vv GetTryWithResourcesExample

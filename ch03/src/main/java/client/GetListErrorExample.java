@@ -51,6 +51,7 @@ public class GetListErrorExample {
     get3.addColumn(cf1, qf2);
     gets.add(get3);
 
+    //没有的行Get 会失败
     Get get4 = new Get(row2);
     /*[*/get4.addColumn(Bytes.toBytes("BOGUS"),/*]*/ qf2);
     gets.add(get4); // co GetListErrorExample-2-AddBogus Add the bogus column family get.

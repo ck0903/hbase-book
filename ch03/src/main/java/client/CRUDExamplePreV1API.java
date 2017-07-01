@@ -16,6 +16,7 @@ import util.HBaseHelper;
 
 // cc CRUDExamplePreV1API Example application using all of the basic access methods (before v1.0)
 @SuppressWarnings("deprecation") // because of old API usage
+
 public class CRUDExamplePreV1API {
 
   // 旧版本的API

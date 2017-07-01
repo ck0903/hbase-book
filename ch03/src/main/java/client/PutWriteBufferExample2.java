@@ -34,6 +34,7 @@ public class PutWriteBufferExample2 {
     Table table = connection.getTable(name);
     BufferedMutator mutator = connection.getBufferedMutator(name);
 
+
     // vv PutWriteBufferExample2
     List<Mutation> mutations = new ArrayList<Mutation>(); // co PutWriteBufferExample2-1-DoPut Create a list to hold all mutations.
 

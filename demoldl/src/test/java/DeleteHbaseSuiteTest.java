@@ -59,4 +59,33 @@ public class DeleteHbaseSuiteTest {
         table.close();
         util.close();
     }
+
+    @Test
+    public void testDeleteListe() throws IOException {
+        Configuration conf = HBaseConfiguration.create();
+        conf.set("hbase.zookeeper.quorum", "master,slave1,slave2");
+        HBaseHelper helper = HBaseHelper.getHelper(conf);
+        helper.dropTable("testtable");
+        helper.createTable("testtable", 100, "colfam1", "colfam2");
+        helper.put("testtable",
+                new String[] { "row1" },
+                new String[] { "colfam1", "colfam2" },
+                new String[] { "qual1", "qual1", "qual2", "qual2", "qual3", "qual3" },
+                new long[]   { 1, 2, 3, 4, 5, 6 },
+                new String[] { "val1", "val1", "val2", "val2", "val3", "val3" });
+       /* helper.put("testtable",
+                new String[] { "row2" },
+                new String[] { "colfam1", "colfam2" },
+                new String[] { "qual1", "qual1", "qual2", "qual2", "qual3", "qual3" },
+                new long[]   { 1, 2, 3, 4, 5, 6 },
+                new String[] { "val1", "val2", "val3", "val4", "val5", "val6" });
+        helper.put("testtable",
+                new String[] { "row3" },
+                new String[] { "colfam1", "colfam2" },
+                new String[] { "qual1", "qual1", "qual2", "qual2", "qual3", "qual3" },
+                new long[]   { 1, 2, 3, 4, 5, 6 },
+                new String[] { "val1", "val2", "val3", "val4", "val5", "val6" });
+        System.out.println("Before delete call...");*/
+        helper.dump("testtable", new String[]{ "row1", "row2", "row3" }, null, null);
+    }
 }

@@ -24,9 +24,11 @@ public class DemoSuiteTest {
 
     @Test
     public void testCopyArray(){
-        int[] array1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
-        int[] array6 = new int[6];
-        System.arraycopy(array1, 1, array6, 0, array6.length);
-        System.out.println(Arrays.toString(array6));
+//        int[] array1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+//        int[] array6 = new int[6];
+//        System.arraycopy(array1, 1, array6, 0, array6.length);
+//        System.out.println(Arrays.toString(array6));
+        System.out.println("person_info".compareTo("company_info"));
+
     }
 }

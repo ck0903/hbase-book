@@ -16,6 +16,8 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import util.HBaseHelper;
 
+// Done .....，
+// 与 DeleteExample 类似
 public class DeleteListExample {
 
   public static void main(String[] args) throws IOException {
@@ -52,7 +54,7 @@ public class DeleteListExample {
     List<Delete> deletes = new ArrayList<Delete>(); // co DeleteListExample-1-CreateList Create a list that holds the Delete instances.
 
     Delete delete1 = new Delete(Bytes.toBytes("row1"));
-    delete1.setTimestamp(4); // co DeleteListExample-2-SetTS Set timestamp for row deletes.
+    delete1.setTimestamp(4); // co DeleteListExample-2-SetTS Set timestamp for row deletes.，删除所有timestamp 小于等于4 的数据
     deletes.add(delete1);
 
     Delete delete2 = new Delete(Bytes.toBytes("row2"));

@@ -1,6 +1,7 @@
 package client;
 
 // cc CellComparatorExample Shows how to use the cell scanner
+
 import java.util.ArrayList;
 import java.util.Collections;
 

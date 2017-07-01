@@ -59,7 +59,7 @@ public class GetClosestRowBeforeExample {
 
     Get get2 = new Get(Bytes.toBytes("row3"));
     get2.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"));
-    get2.setClosestRowBefore(true); // co GetClosestRowBeforeExample-2-Get2 Instruct the get() call to fall back to the previous row, if necessary.
+    get2.setClosestRowBefore(true); // co GetClosestRowBeforeExample-2-Get2 Instruct the get() call to fall back to the previous row, if necessary.获取最近的行
     Result result2 = table.get(get2);
 
     System.out.println("Get 2 isEmpty: " + result2.isEmpty());
@@ -69,7 +69,7 @@ public class GetClosestRowBeforeExample {
     }
 
     Get get3 = new Get(Bytes.toBytes("row2")); // co GetClosestRowBeforeExample-3-Get3 Attempt to read a row that exists.
-    get3.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"));
+    get3.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual100"));
     get3.setClosestRowBefore(true);
     Result result3 = table.get(get3);
 

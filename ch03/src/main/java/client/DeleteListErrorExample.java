@@ -18,6 +18,8 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import util.HBaseHelper;
 
+// Done
+// 对delete 出错时候的处理方式
 public class DeleteListErrorExample {
 
   public static void main(String[] args) throws IOException {
@@ -67,13 +69,13 @@ public class DeleteListErrorExample {
     delete3.addFamily(Bytes.toBytes("colfam2"), 3);
     deletes.add(delete3);
 
-    // vv DeleteListErrorExample
-    Delete delete4 = new Delete(Bytes.toBytes("row2"));
-    /*[*/delete4.addColumn(Bytes.toBytes("BOGUS"),/*]*/ Bytes.toBytes("qual1")); // co DeleteListErrorExample-1-DelColNoTS Add bogus column family to trigger an error.
-    deletes.add(delete4);
+//    // vv DeleteListErrorExample,  addColumn如果里面有列族的属性，即Column Family之，则，Column Family 必须存在，否则会报错
+//    Delete delete4 = new Delete(Bytes.toBytes("row2"));
+//    /*[*/delete4.addColumn(Bytes.toBytes("BOGUS"),/*]*/ Bytes.toBytes("qual1")); // co DeleteListErrorExample-1-DelColNoTS Add bogus column family to trigger an error.
+//    deletes.add(delete4);
 
     try {
-      table.delete(deletes); // co DeleteListErrorExample-2-DoDel Delete the data from multiple rows the HBase table.
+      table.delete(deletes); // co DeleteListErrorExample-2-DoDel Delete the data from multiple rows the HBase table,teltes 里面保存没有delete 成功的数据
     } catch (Exception e) {
       System.err.println("Error: " + e); // co DeleteListErrorExample-3-Catch Guard against remote exceptions.
     }

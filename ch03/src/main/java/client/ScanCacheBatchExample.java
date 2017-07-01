@@ -16,7 +16,8 @@ import org.apache.hadoop.hbase.client.metrics.ScanMetrics;
 
 import util.HBaseHelper;
 
-public class ScanCacheBatchExample {
+public class
+ScanCacheBatchExample {
 
   private static Table table = null;
 

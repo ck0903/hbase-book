@@ -15,6 +15,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import util.HBaseHelper;
 
+
 public class GetFluentExample {
 
   public static void main(String[] args) throws IOException {
@@ -40,7 +41,7 @@ public class GetFluentExample {
       .setMaxVersions()
       .setTimeStamp(1)
       .addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"))
-      .addFamily(Bytes.toBytes("colfam2"));
+      .addFamily(Bytes.toBytes("colfam2"));// 并集
 
     Result result = table.get(get);
     System.out.println("Result: " + result);

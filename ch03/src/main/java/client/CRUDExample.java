@@ -20,6 +20,7 @@ import java.io.IOException;
 
 public class CRUDExample {
 
+
   public static void main(String[] args) throws IOException {
     // vv CRUDExample
     Configuration conf = HBaseConfiguration.create();

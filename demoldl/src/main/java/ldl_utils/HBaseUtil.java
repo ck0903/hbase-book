@@ -34,12 +34,12 @@ public class HBaseUtil {
         return  new HBaseUtil(configuration);
     }
     // 删除表
-    public void dropTabel(String name) throws IOException {
-        dropTabel(TableName.valueOf(name));
+    public void dropTable(String name) throws IOException {
+        dropTable(TableName.valueOf(name));
     }
 
     // 删除表
-    public void dropTabel(TableName name) throws IOException {
+    public void dropTable(TableName name) throws IOException {
         if (admin.tableExists(name)){
             if (admin.isTableEnabled(name)){
                 admin.disableTable(name);
@@ -49,15 +49,24 @@ public class HBaseUtil {
     }
 
     // 创建表
-    public void crateTable(String name, String... colfams) throws IOException {
-        crateTable(TableName.valueOf(name), colfams);
+    public void createTable(String name, String... colfams) throws IOException {
+        createTable(TableName.valueOf(name), colfams);
     }
 
     // 创建表
-    public void crateTable(TableName name, String... colfams) throws IOException {
+    public void createTable(TableName name, String... colfams) throws IOException {
+        createTable(name, 1, colfams);
+    }
+
+    public void createTable(String name, int maxVersions, String... colfams) throws IOException {
+        createTable(TableName.valueOf(name), maxVersions, colfams);
+    }
+
+    public void createTable(TableName name, int maxVersions, String... colfams) throws IOException {
         HTableDescriptor hTableDescriptor = new HTableDescriptor(name);
         for (String colfam:colfams){
             HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(colfam);
+            hColumnDescriptor.setMaxVersions(maxVersions);
             hTableDescriptor.addFamily(hColumnDescriptor);
         }
         admin.createTable(hTableDescriptor);

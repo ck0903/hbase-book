@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 
+// 把Put 数据通过某种方式转换成Map，Json，或者String。
 public class FingerprintExample {
 
   public static void main(String[] args) throws Exception {

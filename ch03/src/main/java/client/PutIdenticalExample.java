@@ -4,18 +4,14 @@ package client;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Connection;
-import org.apache.hadoop.hbase.client.ConnectionFactory;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
 import java.io.IOException;
 
 // Done 这个主要是验证存放数据后，是否是真的把数据插入到了数据库里面
+
 public class PutIdenticalExample {
 
   public static void main(String[] args) throws IOException {
@@ -27,7 +23,6 @@ public class PutIdenticalExample {
 
     Connection connection = ConnectionFactory.createConnection(conf);
     Table table = connection.getTable(TableName.valueOf("testtable"));
-
     // vv PutIdenticalExample
     Put put = new Put(Bytes.toBytes("row1"));
     put.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),

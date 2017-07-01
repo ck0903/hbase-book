@@ -6,22 +6,21 @@ import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Connection;
-import org.apache.hadoop.hbase.client.ConnectionFactory;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import util.HBaseHelper;
 
+// Done
+// check 动作必须在同一行内
 public class CheckAndPutExample {
 
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
 
     HBaseHelper helper = HBaseHelper.getHelper(conf);
-    helper.dropTable("testtable");
-    helper.createTable("testtable", "colfam1");
+//    helper.dropTable("testtable");
+//    helper.createTable("testtable", "colfam1");
 
     Connection connection = ConnectionFactory.createConnection(conf);
     Table table = connection.getTable(TableName.valueOf("testtable"));
@@ -39,9 +38,10 @@ public class CheckAndPutExample {
       Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"), null, put1); // co CheckAndPutExample-04-CAS2 Attempt to store same cell again.
     System.out.println("Put 1b applied: " + res2); // co CheckAndPutExample-05-SOUT2 Print out the result, should be "Put 1b applied: false" as the column now already exists.
 
+    HTable hTable = new HTable(conf, "testtable");
     Put put2 = new Put(Bytes.toBytes("row1"));
     put2.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual2"),
-      Bytes.toBytes("val2")); // co CheckAndPutExample-06-Put2 Create another Put instance, but using a different column qualifier.
+      Bytes.toBytes("val2")); // co CheckAndPutExample-06-Put2 Create another Put instance, but using a different column qualifier.在另一行已经存储了的情况下，才插入新的行
 
     boolean res3 = table.checkAndPut(Bytes.toBytes("row1"),
       Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"), // co CheckAndPutExample-07-CAS3 Store new data only if the previous data has been saved.

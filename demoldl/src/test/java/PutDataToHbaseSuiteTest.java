@@ -2,6 +2,8 @@ import javafx.scene.control.Tab;
 import ldl_utils.HBaseUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -83,8 +85,8 @@ public class PutDataToHbaseSuiteTest {
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.quorum", "master,slave1,slave2");
         HBaseUtil hBaseUtil = HBaseUtil.getHBaseUtils(configuration);
-        hBaseUtil.dropTabel("testDemo");
-        hBaseUtil.crateTable("testDemo", "nima");
+        hBaseUtil.dropTable("testDemo");
+        hBaseUtil.createTable("testDemo", "nima");
         hBaseUtil.close();
     }
 
@@ -96,10 +98,19 @@ public class PutDataToHbaseSuiteTest {
 
         HBaseUtil hBaseUtil = HBaseUtil.getHBaseUtils(configuration);
 
-        hBaseUtil.dropTabel("person");
-        hBaseUtil.crateTable("person", "base_info", "pet");
+        hBaseUtil.dropTable("person");
+        hBaseUtil.createTable("person", 10, "base_info", "pet");
 
         Table table = hBaseUtil.getTable("person");
+
+        Put put1 = new Put(Bytes.toBytes("row1"));
+        put1.addColumn(Bytes.toBytes("base_info"), Bytes.toBytes("name"), 2,  Bytes.toBytes("李第亮"));
+        put1.addColumn(Bytes.toBytes("base_info"), Bytes.toBytes("city"),  2, Bytes.toBytes("杭州"));
+        put1.addColumn(Bytes.toBytes("base_info"), Bytes.toBytes("jobs"),  2, Bytes.toBytes("大数据开发工程师"));
+
+        put1.addColumn(Bytes.toBytes("pet"), Bytes.toBytes("name"), 2,  Bytes.toBytes("浪里个浪里个浪"));
+        put1.addColumn(Bytes.toBytes("pet"), Bytes.toBytes("colour"),  2, Bytes.toBytes("橘黄色"));
+        table.put(put1);
 
         Put put = new Put(Bytes.toBytes("row1"));
 
@@ -111,6 +122,7 @@ public class PutDataToHbaseSuiteTest {
         put.addColumn(Bytes.toBytes("pet"), Bytes.toBytes("colour"), Bytes.toBytes("橘黄色"));
 
         table.put(put);
+
 
         Get get = new Get(Bytes.toBytes("row1"));
         Result result = table.get(get);
@@ -127,8 +139,8 @@ public class PutDataToHbaseSuiteTest {
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.quorum","master,slave1,slave2");
         HBaseUtil hBaseUtil = HBaseUtil.getHBaseUtils(configuration);
-        hBaseUtil.dropTabel("test01");
-        hBaseUtil.crateTable("test01", "person_info");
+        hBaseUtil.dropTable("test01");
+        hBaseUtil.createTable("test01", "person_info");
         Table table = hBaseUtil.getTable("test01");
         List<Put> puts = new ArrayList<>();
 
@@ -146,5 +158,28 @@ public class PutDataToHbaseSuiteTest {
 
         table.close();
         hBaseUtil.close();
+    }
+
+    @Test
+    public void testPutBuffered(){
+
+    }
+
+    public void createTable(TableName name, int maxVersions, String... colfams) throws IOException {
+        Configuration configuration = HBaseConfiguration.create();
+        configuration.set("hbase.zookeeper.quorum","master,slave1,slave2");
+        Connection connection = ConnectionFactory.createConnection(configuration);
+        Admin admin = connection.getAdmin();
+        HTableDescriptor descriptor = new HTableDescriptor(name);
+        HColumnDescriptor columnDescriptor = null;
+        for (String colfam:colfams){
+            columnDescriptor = new HColumnDescriptor(Bytes.toBytes(colfam));
+            columnDescriptor.setMaxVersions(maxVersions);
+        }
+        if (admin.tableExists(name)){
+            System.out.println("Table exit.");
+        } else {
+
+        }
     }
 }

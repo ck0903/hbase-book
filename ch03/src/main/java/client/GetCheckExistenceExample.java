@@ -18,7 +18,9 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import util.HBaseHelper;
 
+// setCheckExistenceOnly 若果设置了true 则Get 会无法返回结果，这尼玛返回的是Get，到底有什么用？
 public class GetCheckExistenceExample {
+
 
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
@@ -48,7 +50,7 @@ public class GetCheckExistenceExample {
 
     Get get1 = new Get(Bytes.toBytes("row2"));
     get1.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"));
-    get1.setCheckExistenceOnly(true);
+    Get get_my = get1.setCheckExistenceOnly(true);
     Result result1 = table.get(get1); // co GetCheckExistenceExample-2-Get1 Check first with existing data.
 
     byte[] val = result1.getValue(Bytes.toBytes("colfam1"),

@@ -17,6 +17,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import util.HBaseHelper;
 
+//Done
 public class PutListErrorExample3 {
 
   // 如果出错，后续可以检测到哪里出的错，以及可以打印出错的信息

@@ -340,11 +340,11 @@ public class HBaseHelper implements Closeable {
   public void put(TableName table, String[] rows, String[] fams, String[] quals,
                   long[] ts, String[] vals) throws IOException {
     Table tbl = connection.getTable(table);//
-    for (String row : rows) {
+    for (String row : rows) {  // 行
       Put put = new Put(Bytes.toBytes(row));//
-      for (String fam : fams) {
+      for (String fam : fams) {  // 列族
         int v = 0;
-        for (String qual : quals) {
+        for (String qual : quals) {  // K
           String val = vals[v < vals.length ? v : vals.length - 1];
           long t = ts[v < ts.length ? v : ts.length - 1];
           System.out.println("Adding: " + row + " " + fam + " " + qual +

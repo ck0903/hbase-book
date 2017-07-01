@@ -18,6 +18,7 @@ import util.HBaseHelper;
 
 public class ScanTimeoutExample {
 
+
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
 
