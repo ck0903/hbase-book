@@ -37,6 +37,8 @@ public class PageFilterExample {
     Table table = connection.getTable(TableName.valueOf("testtable"));
 
     // vv PageFilterExample
+    // 逻辑，通过设置每次返回的行数，
+    // 判断当前页的最后一行是否空
     Filter filter = new PageFilter(15);
 
     int totalRows = 0;
@@ -54,7 +56,7 @@ public class PageFilterExample {
       int localRows = 0;
       Result result;
       while ((result = scanner.next()) != null) {
-        System.out.println(localRows++ + ": " + result);
+       // System.out.println(localRows++ + ": " + result);
         totalRows++;
         lastRow = result.getRow();
       }

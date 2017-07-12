@@ -1,5 +1,4 @@
-import javafx.scene.control.Tab;
-import ldl_utils.HBaseUtil;
+import com.hzgosun.HBaseHelper;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -84,7 +83,7 @@ public class PutDataToHbaseSuiteTest {
     public  void testHbaseUtils() throws IOException {
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.quorum", "master,slave1,slave2");
-        HBaseUtil hBaseUtil = HBaseUtil.getHBaseUtils(configuration);
+        HBaseHelper hBaseUtil = HBaseHelper.getHBaseHelper(configuration);
         hBaseUtil.dropTable("testDemo");
         hBaseUtil.createTable("testDemo", "nima");
         hBaseUtil.close();
@@ -96,7 +95,7 @@ public class PutDataToHbaseSuiteTest {
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.quorum","master,slave1,slave2");
 
-        HBaseUtil hBaseUtil = HBaseUtil.getHBaseUtils(configuration);
+        HBaseHelper hBaseUtil = HBaseHelper.getHBaseHelper(configuration);
 
         hBaseUtil.dropTable("person");
         hBaseUtil.createTable("person", 10, "base_info", "pet");
@@ -138,7 +137,7 @@ public class PutDataToHbaseSuiteTest {
     public void testUsePutListToHbase() throws IOException {
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.quorum","master,slave1,slave2");
-        HBaseUtil hBaseUtil = HBaseUtil.getHBaseUtils(configuration);
+        HBaseHelper hBaseUtil = HBaseHelper.getHBaseHelper(configuration);
         hBaseUtil.dropTable("test01");
         hBaseUtil.createTable("test01", "person_info");
         Table table = hBaseUtil.getTable("test01");
@@ -181,5 +180,6 @@ public class PutDataToHbaseSuiteTest {
         } else {
 
         }
+       // new Scan().setStartRow()
     }
 }

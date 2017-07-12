@@ -1,15 +1,11 @@
-import ldl_utils.HBaseUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Delete;
-import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -20,7 +16,7 @@ public class DeleteHbaseSuiteTest {
     public void test() throws IOException {
         Configuration configuration = HBaseConfiguration.create();
         configuration.set("hbase.zookeeper.quorum", "master,slave1,slave2");
-        HBaseUtil util = HBaseUtil.getHBaseUtils(configuration);
+        HBaseHelper util = HBaseHelper.getHelper(configuration);
 //        util.dropTabel("person");
 //        util.crateTable("person", "base_info", "pet");
 //
@@ -35,10 +31,10 @@ public class DeleteHbaseSuiteTest {
 //            put.addColumn(Bytes.toBytes("pet"),Bytes.toBytes("color"), i, Bytes.toBytes("hei-" + i));
 //            puts.add(put);
 //        }
-
-        Table table = util.getTable("person");
+//
+//        Table table = util.getTable("person");
 //        table.put(puts);
-        Delete delete = new Delete(Bytes.toBytes("row-1"));
+//        Delete delete = new Delete(Bytes.toBytes("row-1"));
 //        delete.setTimestamp(1);// 设置timestam
 //        delete.addColumn(Bytes.toBytes("base_info"), Bytes.toBytes("job"));
 //
@@ -51,41 +47,41 @@ public class DeleteHbaseSuiteTest {
 //        delete.addColumn(Bytes.toBytes("base_info"), Bytes.toBytes("job"));
 //        table.delete(delete);
 
-        // 删除整个列族
-        delete = new Delete(Bytes.toBytes("row-98"));
-        delete.addFamily(Bytes.toBytes("pet"));
-        table.delete(delete);
-
-        table.close();
-        util.close();
+//        // 删除整个列族
+//        delete = new Delete(Bytes.toBytes("row-98"));
+//        delete.addFamily(Bytes.toBytes("pet"));
+//        table.delete(delete);
+//
+//        table.close();
+//        util.close();
     }
 
     @Test
     public void testDeleteListe() throws IOException {
-        Configuration conf = HBaseConfiguration.create();
-        conf.set("hbase.zookeeper.quorum", "master,slave1,slave2");
-        HBaseHelper helper = HBaseHelper.getHelper(conf);
-        helper.dropTable("testtable");
-        helper.createTable("testtable", 100, "colfam1", "colfam2");
-        helper.put("testtable",
-                new String[] { "row1" },
-                new String[] { "colfam1", "colfam2" },
-                new String[] { "qual1", "qual1", "qual2", "qual2", "qual3", "qual3" },
-                new long[]   { 1, 2, 3, 4, 5, 6 },
-                new String[] { "val1", "val1", "val2", "val2", "val3", "val3" });
-       /* helper.put("testtable",
-                new String[] { "row2" },
-                new String[] { "colfam1", "colfam2" },
-                new String[] { "qual1", "qual1", "qual2", "qual2", "qual3", "qual3" },
-                new long[]   { 1, 2, 3, 4, 5, 6 },
-                new String[] { "val1", "val2", "val3", "val4", "val5", "val6" });
-        helper.put("testtable",
-                new String[] { "row3" },
-                new String[] { "colfam1", "colfam2" },
-                new String[] { "qual1", "qual1", "qual2", "qual2", "qual3", "qual3" },
-                new long[]   { 1, 2, 3, 4, 5, 6 },
-                new String[] { "val1", "val2", "val3", "val4", "val5", "val6" });
-        System.out.println("Before delete call...");*/
-        helper.dump("testtable", new String[]{ "row1", "row2", "row3" }, null, null);
+//        Configuration conf = HBaseConfiguration.create();
+//        conf.set("hbase.zookeeper.quorum", "master,slave1,slave2");
+//        HBaseHelper helper = HBaseHelper.getHBaseHelper(conf);
+//        helper.dropTable("testtable");
+//        helper.createTable("testtable", 100, "colfam1", "colfam2");
+//        helper.put("testtable",
+//                new String[] { "row1" },
+//                new String[] { "colfam1", "colfam2" },
+//                new String[] { "qual1", "qual1", "qual2", "qual2", "qual3", "qual3" },
+//                new long[]   { 1, 2, 3, 4, 5, 6 },
+//                new String[] { "val1", "val1", "val2", "val2", "val3", "val3" });
+//       /* helper.put("testtable",
+//                new String[] { "row2" },
+//                new String[] { "colfam1", "colfam2" },
+//                new String[] { "qual1", "qual1", "qual2", "qual2", "qual3", "qual3" },
+//                new long[]   { 1, 2, 3, 4, 5, 6 },
+//                new String[] { "val1", "val2", "val3", "val4", "val5", "val6" });
+//        helper.put("testtable",
+//                new String[] { "row3" },
+//                new String[] { "colfam1", "colfam2" },
+//                new String[] { "qual1", "qual1", "qual2", "qual2", "qual3", "qual3" },
+//                new long[]   { 1, 2, 3, 4, 5, 6 },
+//                new String[] { "val1", "val2", "val3", "val4", "val5", "val6" });
+//        System.out.println("Before delete call...");*/
+//        helper.dump("testtable", new String[]{ "row1", "row2", "row3" }, null, null);
     }
 }

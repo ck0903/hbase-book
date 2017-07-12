@@ -40,7 +40,7 @@ public class SingleColumnValueFilterExample {
       Bytes.toBytes("col-5"),
       CompareFilter.CompareOp.NOT_EQUAL,
       new SubstringComparator("val-5"));
-    filter.setFilterIfMissing(true);
+    filter.setFilterIfMissing(false);
 
     Scan scan = new Scan();
     scan.setFilter(filter);

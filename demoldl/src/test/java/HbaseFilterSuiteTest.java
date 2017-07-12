@@ -1,4 +1,4 @@
-import ldl_utils.HBaseUtil;
+import com.hzgosun.HBaseHelper;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.*;
@@ -16,25 +16,85 @@ import java.util.Random;
 public class HbaseFilterSuiteTest {
     private Connection connection = null;
     private Configuration configuration = null;
-    private HBaseUtil hBaseUtil = null;
-//    @Before
+    private HBaseHelper hBaseUtil = null;
+    @Before
     public void toInitSomethingForSuiteTest() throws IOException {
          this.configuration = HBaseConfiguration.create();
-         this.hBaseUtil = HBaseUtil.getHBaseUtils(configuration);
+         this.hBaseUtil = HBaseHelper.getHBaseHelper(configuration);
     }
 
+//    @After
+//    public void toCloseSomtingUnUse() throws IOException {
+//        this.connection.close();
+//    }
+
+    @Test
+    public void testQuarifierFilter() throws IOException {
+        Table table = hBaseUtil.getTable("ldltest");
+        Filter filter = new QualifierFilter(CompareFilter.CompareOp.EQUAL, new BinaryComparator(Bytes.toBytes("person_info2-087")));
+        Scan scan = new Scan();
+        scan.setFilter(filter);
+        ResultScanner scanner = table.getScanner(scan);
+        System.out.println("testing------------------------");
+        for (Result result:scanner){
+            System.out.println(result);
+        }
+
+        System.out.println("testing--------------------");
+        Scan scan1 = new Scan().addColumn(Bytes.toBytes("person_info2"), Bytes.toBytes("person_info2-087"));
+        ResultScanner results = table.getScanner(scan);
+        for (Result result:results){
+            System.out.println(result);
+        }
+        table.close();
+        hBaseUtil.close();
+    }
+
+
+
+    // 以下是关于列族过滤器的测试
+    @Test
+    public void testFamilyFiter() throws IOException {
+        Table table = hBaseUtil.getTable("ldltest");
+//        Filter filter1 = new FamilyFilter(CompareFilter.CompareOp.LESS, new BinaryComparator(Bytes.toBytes("person_info3")));
+//        Scan scan = new Scan();
+//        scan.setFilter(filter1);
+//        ResultScanner results = table.getScanner(scan);
+//        for (Result result:results){
+//            System.out.println(result);
+//        }
+//
+//        System.out.println("testing2---------------------");
+//        Get get1 = new Get(Bytes.toBytes("row-005"));
+//        get1.setFilter(filter1);
+//        Result result = table.get(get1);
+//        System.out.println(result);
+
+        System.out.println("testing-----------------------");
+        System.out.println();
+        Filter filter2 = new FamilyFilter(CompareFilter.CompareOp.EQUAL, new BinaryComparator(Bytes.toBytes("person_info3")));
+        Scan scan1 = new Scan();
+        scan1.setFilter(filter2);
+        ResultScanner results1 = table.getScanner(scan1);
+        for (Result result1: results1){
+            System.out.println(result1);
+        }
+        table.close();
+        hBaseUtil.close();
+    }
+    // 以下是关于行过滤器的使用测试
     //1，同样的基础的部分，首先；要获取Connection以及Table 实例对象。
     //2，用Scan 来查找一批数据
     //3，创建Fiter 实例对象，传入两个参数，一个比较运算符，一个比较器，作用，对Scan 查找出来的数据进一步的过滤。
-    //4，如下的Fiter 是行过滤器，则针对过滤的是行，
-    //5，filter1 属于精确匹配。会过滤掉小于row-096 的值（匹配大于或者等于row-96 的行）
-    //6，filter2 属于正则表达式查找。（匹配）
-    //7，
+    //4，如下的fiter 是行过滤器，则针对过滤的是行，
+    //5，filter 属于精确匹配。会过滤掉小于row-096 的值（匹配大于或者等于row-96 的行）
+    //6，filter1 属于正则表达式查找。（匹配）
+    //7，filter2 属于子串匹配查找
     @Test
     public void testRowFiter01() throws IOException {
         Table table = hBaseUtil.getTable("ldltest");
         Scan scan = new Scan();
-        scan.addColumn(Bytes.toBytes("person_info"), Bytes.toBytes("base_info-041"));
+        scan.addColumn(Bytes.toBytes("person_info1"), Bytes.toBytes("person_info1-041"));
 
         Filter filter = new RowFilter(CompareFilter.CompareOp.GREATER_OR_EQUAL,
                 new BinaryComparator(Bytes.toBytes("row-096")));
@@ -60,17 +120,19 @@ public class HbaseFilterSuiteTest {
         for (Result result:scanner2){
             System.out.println("result:"+ result);
         }
+        table.close();
+        hBaseUtil.close();
     }
 
-    @Test
+    /*@Test
     public void testRowFilter02(){
 
-    }
+    }*/
 
-   @Before
+   //@Before
     public void createTestDataForSuiteTest() throws IOException {
         Configuration configuration = HBaseConfiguration.create();
-        HBaseUtil hBaseUtil = HBaseUtil.getHBaseUtils(configuration);
+        HBaseHelper hBaseUtil = HBaseHelper.getHBaseHelper(configuration);
         hBaseUtil.dropTable("ldltest");
         hBaseUtil.createTable("ldltest", "person_info1", "person_info2","person_info3");
         Table table = hBaseUtil.getTable("ldltest");

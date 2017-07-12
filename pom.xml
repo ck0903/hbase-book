@@ -74,6 +74,7 @@
     <module>ch13</module>
     <module>hush</module>
     <module>demoldl</module>
+      <module>lelasticsearch</module>
   </modules>
 
   <dependencies>

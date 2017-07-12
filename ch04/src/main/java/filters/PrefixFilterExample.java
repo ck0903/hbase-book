@@ -51,7 +51,7 @@ public class PrefixFilterExample {
     }
     scanner.close();
 
-    Get get = new Get(Bytes.toBytes("row-5"));
+    Get get = new Get(Bytes.toBytes("row-1"));
     get.setFilter(filter);
     Result result = table.get(get);
     // ^^ PrefixFilterExample
