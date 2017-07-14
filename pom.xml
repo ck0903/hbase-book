@@ -20,16 +20,16 @@
   </scm>
 
   <!--<repositories>-->
-    <!--<repository>-->
-      <!--<id>cloudera-releases</id>-->
-      <!--<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>-->
-      <!--<releases>-->
-        <!--<enabled>true</enabled>-->
-      <!--</releases>-->
-      <!--<snapshots>-->
-        <!--<enabled>true</enabled>-->
-      <!--</snapshots>-->
-    <!--</repository>-->
+  <!--<repository>-->
+  <!--<id>cloudera-releases</id>-->
+  <!--<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>-->
+  <!--<releases>-->
+  <!--<enabled>true</enabled>-->
+  <!--</releases>-->
+  <!--<snapshots>-->
+  <!--<enabled>true</enabled>-->
+  <!--</snapshots>-->
+  <!--</repository>-->
   <!--</repositories>-->
 
   <properties>
@@ -74,7 +74,8 @@
     <module>ch13</module>
     <module>hush</module>
     <module>demoldl</module>
-      <module>lelasticsearch</module>
+    <module>lelasticsearch</module>
+    <module>hbase2es</module>
   </modules>
 
   <dependencies>

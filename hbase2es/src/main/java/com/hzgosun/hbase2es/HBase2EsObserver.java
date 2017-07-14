@@ -12,6 +12,7 @@ import org.apache.hadoop.hbase.coprocessor.ObserverContext;
 import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
@@ -35,16 +36,32 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+
+// 存在的问题: 现在没有在ES 上生成InFo
+// 以上问题已经解决
+// 后续问题，过滤掉不需要添加到Es 中的字段，又或者把图片单独从表中提取出来，这个不现实。
 public class HBase2EsObserver  extends BaseRegionObserver{
+
+    private static Logger logger = Logger.getLogger(BaseRegionObserver.class);
 
     //  从外部获取Es 集群的信息
     private static void readConfiguration(CoprocessorEnvironment env){
         Configuration conf = env.getConfiguration();  // 集群信息
         EsClientUtils.clusterName = conf.get("es_cluster");  // es集群名字
         EsClientUtils.nodeHost = conf.get("es_host");    // es 列表
-        EsClientUtils.nodePort = conf.getInt("es_host", 9300);  // es的端口
+        EsClientUtils.nodePort = conf.getInt("es_port", 9300);  // es的端口
         EsClientUtils.indexName = conf.get("es_index");  // 索引
-        EsClientUtils.typeName = conf.get("ex_type");       // 类型
+        EsClientUtils.typeName = conf.get("es_type");       // 类型
+
+
+        logger.info("============================================================================================");
+        logger.info("=============================================================================================");
+        logger.info("the es cluster info :===================== cluser_name " + EsClientUtils.clusterName
+                +  ", cluster_hosts: , " + EsClientUtils.nodeHost + ", cluster_port: "
+                + EsClientUtils.nodePort + ",index: " + EsClientUtils.indexName +
+                ",type: " + EsClientUtils.typeName  + "===========================");
+        logger.info("=================================================================================================");
+        logger.info("==============================================================================================");
     }
 
     @Override
@@ -62,7 +79,10 @@ public class HBase2EsObserver  extends BaseRegionObserver{
     @Override
     public void postPut(ObserverContext<RegionCoprocessorEnvironment> e, Put put, WALEdit edit, Durability durability)
             throws IOException {
-        System.out.println("------------------something triggred when put-------------------");
+//        System.out.println("------------------something triggred when afere put-------------------");
+        logger.info("=================================================================================================");
+        logger.info("==============================================================================================");
+        logger.info("==================================something triggred when afere put================================");
         String indexId = new String(put.getRow());   // 通过Put 对象获取rowkey 作为id，
         NavigableMap<byte[], List<Cell>> familyMap = put.getFamilyCellMap();
         Map<String, Object> infoJson = new HashMap<String, Object>();
@@ -71,6 +91,8 @@ public class HBase2EsObserver  extends BaseRegionObserver{
             for (Cell cell : entry.getValue()) {
                 String key = Bytes.toString(CellUtil.cloneQualifier(cell));
                 String value = Bytes.toString(CellUtil.cloneValue(cell));
+                logger.info("==========================属性========================================");
+                logger.info("=============key: " + key + "  value: " + value);
                 infoJson.put(key, value);
             }
         }
@@ -81,10 +103,13 @@ public class HBase2EsObserver  extends BaseRegionObserver{
     @Override
     public void postDelete(ObserverContext<RegionCoprocessorEnvironment> e, Delete delete, WALEdit edit, Durability durability)
             throws IOException {
-        System.out.println("------------------something triggred when put-------------------");
+        logger.info("=================================================================================================");
+        logger.info("==============================================================================================");
+        logger.info("==================================something triggred when afere DELETE================================");
         String indexId = new String(delete.getRow());
+        logger.info("===============================inde: " + indexId + " ============================================");
         try {
-            ElasticSearchBulkOperator.addDeleteBuilderToBulk(EsClientUtils.client.prepareDelete(EsClientUtils.indexName, EsClientUtils.typeName, indexId));
+            //ElasticSearchBulkOperator.addDeleteBuilderToBulk(EsClientUtils.client.prepareDelete(EsClientUtils.indexName, EsClientUtils.typeName, indexId));
         } catch (Exception ex) {
             ex.printStackTrace();
         }

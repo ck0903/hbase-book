@@ -36,16 +36,20 @@ public class DemoSuiteTest {
 
     @Test
     public void testVariableLengthArgs(){
-        Map<String, String> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         map.put("key01", "value01");
         map.put("key02", "value02");
         map.put("key03", "value03");
         map.put("key04", "value04");
+        map.put("key05", new byte[]{1, 2, 3, 4, 5});
         Set<String> keys = map.keySet();
         Iterator<String> iterator = keys.iterator();
         while (iterator.hasNext()){
             String key = iterator.next();
-            System.out.println("kye: ==>  " + key  + "   value  ===>  " + map.get(key));
+            if ("key05".equals(key)){
+                System.out.println(Arrays.toString((byte[])map.get(key)));
+            }
+                System.out.println("kye: ==>  " + key  + "   value  ===>  " + map.get(key));
         }
     }
 

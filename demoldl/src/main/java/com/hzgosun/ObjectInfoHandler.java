@@ -65,6 +65,15 @@ public interface ObjectInfoHandler {
     public ObjectSearchResult getObjectInfo(String paltformId, String searchID);
 
 
+    /**
+     *  根据传进来的图片和人车标志，计算特征值，并且返回
+     * @param tag  人车标志
+     * @param photo  照片byte 数组
+     * @return  照片的特征值
+     */
+    public byte[] getEigenValue(String tag, byte[] photo);
+
+
     // rowkey 的设计： 身份证号+平台id+人员类型Key+ 性别(会超过16个字节，理论上rowkeys 的设计越短越好)
     // row
 }
