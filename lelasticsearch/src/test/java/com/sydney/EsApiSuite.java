@@ -35,9 +35,11 @@ public class EsApiSuite {
     public void inintClientEnv() throws UnknownHostException {
         System.out.println("====================call before testing===============================");
         Settings settings = Settings.builder()
-                .put("cluster.name", "my-cluster").build();
+                .put("cluster.name", "my-cluser").build();
         client = new PreBuiltTransportClient(settings);
-        client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("s200"), 9300));
+        client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("s100"), 9300))
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("s101"), 9300))
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("s102"), 9300));
     }
     @After
     public void closeClientOrOtherEnv(){
@@ -50,12 +52,11 @@ public class EsApiSuite {
     public void testIndexResponse() throws IOException {
 //        TransportClient client = new PreBuiltTransportClient(Settings.EMPTY)
 //                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("s200"), 9300));
-        IndexResponse response = client.prepareIndex("twitter", "tweet", "1")
+        IndexResponse response = client.prepareIndex("twitter", "tweet", "7")
                 .setSource(jsonBuilder()
                     .startObject()
-                        .field("user" ,"sydney")
+                        .field("user" ,"enhaye")
                         .field("postDate", new Date())
-                        .field("message", "trying out ElasticSearch")
                     .endObject()).get();
 
         String _index = response.getIndex();
@@ -68,9 +69,9 @@ public class EsApiSuite {
 
     @Test
     public void testGetResponse() throws UnknownHostException {
-        Settings settings = Settings.builder()
-                .put("cluster.name","my-cluster").build();
-        GetResponse response = client.prepareGet("twitter", "tweet", "1").get();
+//        Settings settings = Settings.builder()
+//                .put("cluster.name","my-cluster").build();
+        GetResponse response = client.prepareGet("twitter", "tweet", "9").get();
 //        System.out.println("user： " + response.getField("user") + " ,message： "
 //                + response.getField("message") + " , postDate: " + response.getField("postDate"));
         System.out.println(response.isExists());

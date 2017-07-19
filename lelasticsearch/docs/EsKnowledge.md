@@ -925,7 +925,193 @@ curl -XGET 'localhost:9200/_search?pretty' -H 'Content-Type: application/json' -
 }
 ```
 
+### 8.3 过滤(bool 查询)和查询
+```
+过滤：
+（确切的）
+created 时间是否在 2013 与 2014 这个区间？
+status 字段是否包含 published 这个单词？
+lat_lon 字段表示的位置是否在指定点的 10km 范围内？
+
+查询：
+查找与 full text search 这个词语最佳匹配的文档
+包含 run 这个词，也能匹配 runs 、 running 、 jog 或者 sprint
+包含 quick 、 brown 和 fox 这几个词 — 词之间离的越近，文档相关性越高
+标有 lucene 、 search 或者 java 标签 — 标签越多，相关性越高
+
+过滤性能高于查询
+
+```
+
+### 8.4 一些常用的查询：
+```
+match_all 查询：
+{ "match_all": {}}
+match 查询：
+{ "match": { "tweet": "About Search" }}
+{ "match": { "age":    26           }}
+{ "match": { "date":   "2014-09-01" }}
+{ "match": { "public": true         }}
+{ "match": { "tag":    "full_text"  }}
+
+muti_match 查询：
+（多个字段）
+{
+    "multi_match": {
+        "query":    "full text search",
+        "fields":   [ "title", "body" ]
+    }
+}
+
+range 查询：
+{
+    "range": {
+        "age": {
+            "gte":  20,
+            "lt":   30
+        }
+    }
+}
+
+term 查询：（精确查询）
+{ "term": { "age":    26           }}
+{ "term": { "date":   "2014-09-01" }}
+{ "term": { "public": true         }}
+{ "term": { "tag":    "full_text"  }}
+
+terms 查询：
+{ "terms": { "tag": [ "search", "full_text", "nosql" ] }}
 
 
+terms 查询和 term 查询一样，但它允许你指定多值进行匹配。
+如果这个字段包含了指定值中的任何一个值，那么这个文档满足条件：
+
+exists 查询和 missing 查询编辑
+exists 查询和 missing 查询被用于查找那些指定字段中有值 
+(exists) 或无值 (missing) 的文档。这与SQL中的 IS_NULL (missing) 和 
+NOT IS_NULL (exists) 在本质上具有共性：
+
+{
+    "exists":   {
+        "field":    "title"
+    }
+}
+```
+### 8.5 组合查询
+```
+must
+文档 必须 匹配这些条件才能被包含进来。
+must_not
+文档 必须不 匹配这些条件才能被包含进来。
+should
+如果满足这些语句中的任意语句，将增加 _score ，否则，
+无任何影响。它们主要用于修正每个文档的相关性得分。
+filter
+必须 匹配，但它以不评分、过滤模式来进行。这些语句对评分没有贡献，
+只是根据过滤标准来排除或包含文档。
+
+下面的查询用于查找 title 字段匹配 how to make millions 并且不被标识为
+ spam 的文档。那些被标识为 starred 或在2014之后的文档，
+将比另外那些文档拥有更高的排名。如果 _两者_ 都满足，那么它排名将更高：
+{
+    "bool": {
+        "must":     { "match": { "title": "how to make millions" }},
+        "must_not": { "match": { "tag":   "spam" }},
+        "should": [
+            { "match": { "tag": "starred" }},
+            { "range": { "date": { "gte": "2014-01-01" }}}
+        ]
+    }
+}
+如果我们不想因为文档的时间而影响得分，可以用 filter 语句来重写前面的例子：
+
+{
+    "bool": {
+        "must":     { "match": { "title": "how to make millions" }},
+        "must_not": { "match": { "tag":   "spam" }},
+        "should": [
+            { "match": { "tag": "starred" }}
+        ],
+        "filter": {
+          "range": { "date": { "gte": "2014-01-01" }} 
+        }
+    }
+}
+
+如果你需要通过多个不同的标准来过滤你的文档，
+bool 查询本身也可以被用做不评分的查询。简单地将它放置到 filter 语句中并在内部构建布尔逻辑：
+{
+    "bool": {
+        "must":     { "match": { "title": "how to make millions" }},
+        "must_not": { "match": { "tag":   "spam" }},
+        "should": [
+            { "match": { "tag": "starred" }}
+        ],
+        "filter": {
+          "bool": { 
+              "must": [
+                  { "range": { "date": { "gte": "2014-01-01" }}},
+                  { "range": { "price": { "lte": 29.99 }}}
+              ],
+              "must_not": [
+                  { "term": { "category": "ebooks" }}
+              ]
+          }
+        }
+    }
+}
+
+```
+### 8.6 验证查询
+```
+验证查询：
+curl -XGET 'localhost:9200/gb/tweet/_validate/query?pretty' -H 'Content-Type: application/json' -d'
+{
+   "query": {
+      "tweet" : {
+         "match" : "really powerful"
+      }
+   }
+}
+'
+
+理解错误：
+curl -XGET 's200:9200/gb/tweet/_validate/query?explain&pretty' -H 'Content-Type: application/json' -d'
+{
+   "query": {
+      "tweet" : {
+         "match" : "really powerful"
+      }
+   }
+}
+'
+
+理解查询语句
+curl -XGET 'localhost:9200/_validate/query?explain&pretty' -H 'Content-Type: application/json' -d'
+{
+   "query": {
+      "match" : {
+         "tweet" : "really powerful"
+      }
+   }
+}
+'
+```
+## 排序与相关性
+```
+
+按照字段进行排序：
+curl -XGET 'localhost:9200/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+    "query" : {
+        "bool" : {
+            "filter" : { "term" : { "user_id" : 1 }}
+        }
+    },
+    "sort": { "date": { "order": "desc" }}
+}
+'
+
+```
 
 

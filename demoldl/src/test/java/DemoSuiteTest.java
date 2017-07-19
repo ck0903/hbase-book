@@ -97,4 +97,9 @@ public class DemoSuiteTest {
 //        System.out.println("total rows: " + totalRows);
 //        // ^^ PageFilterExample
     }
+
+    @Test
+    public void testDemo00(){
+        System.out.println(new Date());
+    }
 }

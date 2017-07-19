@@ -76,6 +76,7 @@
     <module>demoldl</module>
     <module>lelasticsearch</module>
     <module>hbase2es</module>
+      <module>ObjectInfo</module>
   </modules>
 
   <dependencies>

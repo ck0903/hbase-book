@@ -1,4 +1,4 @@
-package com.hzgosun.hbase2es;
+package com.hzgc.hbase2es;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.Cell;
@@ -37,6 +37,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 
+// 存在的问题: 现在没有在ES 上生成InFo
+// 以上问题已经解决
+// 后续问题，过滤掉不需要添加到Es 中的字段，又或者把图片单独从表中提取出来，这个不现实。
 public class HBase2EsObserver  extends BaseRegionObserver{
 
     private static Logger logger = Logger.getLogger(BaseRegionObserver.class);
@@ -45,20 +48,20 @@ public class HBase2EsObserver  extends BaseRegionObserver{
     private static void readConfiguration(CoprocessorEnvironment env){
         Configuration conf = env.getConfiguration();  // 集群信息
         EsClientUtils.clusterName = conf.get("es_cluster");  // es集群名字
-        EsClientUtils.nodeHost1 = conf.get("es_host1");    // es 列表
-//        EsClientUtils.nodeHost2 = conf.get("es_host2");    // es 列表
-//        EsClientUtils.nodeHost3 = conf.get("es_host3");    // es 列表
+        EsClientUtils.nodeHost = conf.get("es_host");    // es 列表
         EsClientUtils.nodePort = conf.getInt("es_port", 9300);  // es的端口
         EsClientUtils.indexName = conf.get("es_index");  // 索引
         EsClientUtils.typeName = conf.get("es_type");       // 类型
 
 
+        logger.info("============================================================================================");
         logger.info("=============================================================================================");
         logger.info("the es cluster info :===================== cluser_name " + EsClientUtils.clusterName
-                +  ", cluster_hosts: , " + EsClientUtils.nodeHost1
-                + ", cluster_port: " + EsClientUtils.nodePort + ",index: " + EsClientUtils.indexName +
-                ",type: " + EsClientUtils.typeName  + "===========================");
+                +  ", cluster_hosts: , " + EsClientUtils.nodeHost + ", cluster_port: "
+                + EsClientUtils.nodePort + ",index: " + EsClientUtils.indexName +
+                ",type: " + EsClientUtils.typeName  + "=========================");
         logger.info("=================================================================================================");
+        logger.info("==============================================================================================");
     }
 
     @Override
@@ -74,8 +77,8 @@ public class HBase2EsObserver  extends BaseRegionObserver{
 
     // 添加或者修改时候的自动触发的操作，
     @Override
-    public void postPut(ObserverContext<RegionCoprocessorEnvironment> e, Put put, WALEdit edit, Durability durability) {
-//        System.out.println("------------------something triggred when afere put-------------------");
+    public void postPut(ObserverContext<RegionCoprocessorEnvironment> e, Put put, WALEdit edit, Durability durability)
+            throws IOException {
         logger.info("==============================================================================================");
         logger.info("==================================something triggred when afere put================================");
         String indexId = new String(put.getRow());   // 通过Put 对象获取rowkey 作为id，
@@ -100,7 +103,8 @@ public class HBase2EsObserver  extends BaseRegionObserver{
     }
 
     @Override
-    public void postDelete(ObserverContext<RegionCoprocessorEnvironment> e, Delete delete, WALEdit edit, Durability durability) {
+    public void postDelete(ObserverContext<RegionCoprocessorEnvironment> e, Delete delete, WALEdit edit, Durability durability)
+            throws IOException {
         logger.info("==============================================================================================");
         logger.info("==================================something triggred when afere DELETE================================");
         String indexId = new String(delete.getRow());
@@ -115,29 +119,17 @@ public class HBase2EsObserver  extends BaseRegionObserver{
 
 class EsClientUtils{
     public static String clusterName;
-    public static String nodeHost1;
-//    public static String nodeHost2;
-//    public static String nodeHost3;
+    public static String nodeHost;
     public static int nodePort;
     public static String indexName;
     public static String typeName;
     public static Client client;
 
     public static void initEsClient() throws UnknownHostException {
-        Logger logger = Logger.getLogger(EsClientUtils.class);
-        logger.info("=============================================================================================");
-        logger.info("==========================the es cluster info can be seen bellow=============================");
-        logger.info("==========================es_cluster_name: " + EsClientUtils.clusterName + "====================");
-        logger.info("==========================es_cluster_hosts: " + EsClientUtils.nodeHost1  + "====================");
-        logger.info("==========================es_cluster_port: " + EsClientUtils.nodePort  + "======================");
-        logger.info("==========================index: " + EsClientUtils.indexName + "================================");
-        logger.info("==========================type: " + EsClientUtils.typeName  + "=================================");
         Settings settings = Settings.builder()
                 .put("cluster.name", EsClientUtils.clusterName).build();
-        client = new PreBuiltTransportClient(settings)
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(EsClientUtils.nodeHost1), EsClientUtils.nodePort));
-//                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(EsClientUtils.nodeHost2), EsClientUtils.nodePort))
-//                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(EsClientUtils.nodeHost3), EsClientUtils.nodePort));
+        client = new PreBuiltTransportClient(settings).addTransportAddress(new InetSocketTransportAddress(
+                InetAddress.getByName(EsClientUtils.nodeHost), EsClientUtils.nodePort));
     }
 
     public static void clostEsClient(){
