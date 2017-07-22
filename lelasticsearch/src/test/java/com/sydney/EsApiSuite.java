@@ -5,25 +5,29 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
@@ -35,11 +39,9 @@ public class EsApiSuite {
     public void inintClientEnv() throws UnknownHostException {
         System.out.println("====================call before testing===============================");
         Settings settings = Settings.builder()
-                .put("cluster.name", "my-cluser").build();
+                .put("cluster.name", "my-cluster").build();
         client = new PreBuiltTransportClient(settings);
-        client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("s100"), 9300))
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("s101"), 9300))
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("s102"), 9300));
+        client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("ldl"), 9300));
     }
     @After
     public void closeClientOrOtherEnv(){
@@ -52,7 +54,7 @@ public class EsApiSuite {
     public void testIndexResponse() throws IOException {
 //        TransportClient client = new PreBuiltTransportClient(Settings.EMPTY)
 //                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("s200"), 9300));
-        IndexResponse response = client.prepareIndex("twitter", "tweet", "7")
+        IndexResponse response = client.prepareIndex("twitter", "tweet", "9")
                 .setSource(jsonBuilder()
                     .startObject()
                         .field("user" ,"enhaye")
@@ -68,6 +70,14 @@ public class EsApiSuite {
     }
 
     @Test
+    public void testIndexResponse01(){
+        Map<String, String> mapOfJson = new HashMap<String, String>();
+        mapOfJson.put("name", "xiaohaong");
+        mapOfJson.put("sex", "1");
+        IndexResponse response1 = client.prepareIndex("objectinfo", "person", "row2").setSource(mapOfJson).get();
+        System.out.println(response1.status());
+    }
+    @Test
     public void testGetResponse() throws UnknownHostException {
 //        Settings settings = Settings.builder()
 //                .put("cluster.name","my-cluster").build();
@@ -76,15 +86,17 @@ public class EsApiSuite {
 //                + response.getField("message") + " , postDate: " + response.getField("postDate"));
         System.out.println(response.isExists());
         Map<String, Object> source = response.getSource();
-        Set<String> set = source.keySet();
-        Iterator<String> iterator = set.iterator();
-        while (iterator.hasNext()){
-            String key = iterator.next();
-            System.out.println("key: " + key + ", value: " + source.get(key));
+        if (source !=null ){
+            Set<String> set = source.keySet();
+            Iterator<String> iterator = set.iterator();
+            while (iterator.hasNext()){
+                String key = iterator.next();
+                System.out.println("key: " + key + ", value: " + source.get(key));
+            }
         }
     }
 
-    @Test
+   // @Test
     public void testDeleteResponse01() throws UnknownHostException {
         DeleteResponse response = client.prepareDelete("index", "type", "1").get();
 //        IndicesExistsRequest existsRequest = new IndicesExistsRequest("")
@@ -93,19 +105,44 @@ public class EsApiSuite {
 
     @Test
     public  void testUpdate01() throws ExecutionException, InterruptedException, IOException {
-        IndexRequest indexRequest = new IndexRequest("index", "type", "1")
+        IndexRequest indexRequest = new IndexRequest("index", "type", "2")
                 .source(jsonBuilder()
                         .startObject()
                         .field("name", "Joe Smith")
                         .field("gender", "male")
                         .endObject());
-        UpdateRequest updateRequest = new UpdateRequest("index", "type", "1")
+        UpdateRequest updateRequest = new UpdateRequest("index", "type", "2")
                 .doc(jsonBuilder()
                         .startObject()
                         .field("gender", "female")
                         .endObject())
                 .upsert(indexRequest);
         client.update(updateRequest).get();
+    }
+
+    @Test
+    public void testSearchByName(){
+        SearchResponse response = client.prepareSearch("objectinfo")
+                .setTypes("person")
+                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+                .setQuery(QueryBuilders.termQuery("name", "小"))
+                .setQuery(QueryBuilders.termQuery("name", "enahals"))
+                .setQuery(QueryBuilders.termQuery("name", "王")).get();
+        SearchHits hits = response.getHits();
+        SearchHit[] searchHits = hits.getHits();
+        System.out.println("length:" + searchHits.length);
+        Map<String, Object> source = new HashMap<String, Object>();
+        for (SearchHit searchHit: searchHits){
+            System.out.println();
+            source = searchHit.getSource();
+            Set<String> keys = source.keySet();
+            Iterator<String> iterator = keys.iterator();
+            while (iterator.hasNext()){
+                String key = iterator.next();
+                System.out.println("key: " + key + ",value: " + source.get(key));
+            }
+        }
+
     }
 
 }

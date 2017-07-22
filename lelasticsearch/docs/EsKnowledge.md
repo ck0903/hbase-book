@@ -1,4 +1,4 @@
-# 一， Elastric 知识点
+# 一， Elastric 基础知识点
 
 ## 1 背景简介
 ### 1.1,HBase 现状分析 和Elasticsearch 简介
@@ -25,14 +25,63 @@ HBase 和Elasticsearch 之间建立索引
 ### 2.1，Elasticsearch 的安装
 ```
 (Elastic 是java 写的搜索和分析引起，依赖jdk安装)
+单节点安装：
 I， 到Elasticsearch 官网上，把安装包下载到本地，
 II， 解压tar包，
 III， 把tar 包的文件和目录改成非root 用户。
 IV， 启动ElasticSearch  
 ./bin/elasticsearch 或者./bin/elasticsearch -d
+
+elastic 的配置文档如下参考如下：
+单节点elasticsearch.yml 配置
+cluster.name: my-cluser
+node.name: s100
+network.host: 192.168.1.132
+http.port: 9200
+#http.cors.enabled: true
+#http.cors.allow-origin: "*"
+#node.master: true
+#node.data: true
+#discovery.zen.ping.unicast.hosts: ["s100", "s101","s102"]
+bootstrap.system_call_filter: false
+
+集群模式：
+cluster.name: my-cluser
+node.name: s100
+network.host: 192.168.1.132
+http.port: 9200
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+node.master: true
+node.data: true
+discovery.zen.ping.unicast.hosts: ["s100", "s101","s102"]
+bootstrap.system_call_filter: false
+
 ```
 ### 2.2，Elastic 的一些简单命令和概念
 ```
+ES shell 格式
+一个 Elasticsearch 请求和任何 HTTP 请求一样由若干相同的部件组成：
+
+curl -X<VERB> '<PROTOCOL>://<HOST>:<PORT>/<PATH>?<QUERY_STRING>' -d '<BODY>'
+被 < > 标记的部件：
+VERB
+适当的 HTTP 方法 或 谓词 : GET`、 `POST`、 `PUT`、 `HEAD 或者 `DELETE`。
+PROTOCOL
+http 或者 https`（如果你在 Elasticsearch 前面有一个 `https 代理）
+HOST
+Elasticsearch 集群中任意节点的主机名，或者用 localhost 代表本地机器上的节点。
+PORT
+运行 Elasticsearch HTTP 服务的端口号，默认是 9200 。
+PATH
+API 的终端路径（例如 _count 将返回集群中文档数量）。Path 可能包含多个组件，
+例如：_cluster/stats 和 _nodes/stats/jvm 。
+QUERY_STRING
+任意可选的查询字符串参数 (例如 ?pretty 将格式化地输出 JSON 返回值，使其更容易阅读)
+BODY
+一个 JSON 格式的请求体 (如果请求需要的话)
+
+
 通过 curl 'http://localhost:9200/?pretty' 查看Elasticsearch  是否启动成功。
 返回集群中文档的数量：
 (可以加I 显示头信息)
@@ -42,6 +91,17 @@ curl -XGET 'http://localhost:9200/_count?pretty' -d '
 "match_all": {}
 }
 }
+
+查询集群中文档的个数：
+curl -XGET 'http://s101:9200/_count?pretty' -d '
+{
+    "query": {
+        "match_all": {}
+    }
+}
+'
+
+
 ```
 ### 2.3，举例：
 ```
@@ -1097,7 +1157,9 @@ curl -XGET 'localhost:9200/_validate/query?explain&pretty' -H 'Content-Type: app
 }
 '
 ```
-## 排序与相关性
+
+## 9,排序与相关性
+### 9.1 排序
 ```
 
 按照字段进行排序：
@@ -1111,7 +1173,847 @@ curl -XGET 'localhost:9200/_search?pretty' -H 'Content-Type: application/json' -
     "sort": { "date": { "order": "desc" }}
 }
 '
+多级排序
+curl -XGET 'localhost:9200/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+    "query" : {
+        "bool" : {
+            "must":   { "match": { "tweet": "manage text search" }},
+            "filter" : { "term" : { "user_id" : 2 }}
+        }
+    },
+    "sort": [
+        { "date":   { "order": "desc" }},
+        { "_score": { "order": "desc" }}
+    ]
+}
+'
+
+curl -XGET 's101:9200/_search?sort=date:desc&sort=_score&q=search&pretty'
+
+```
+### 9.2 ****** 排序的内容先进行跳过，后续有时间再进行整理
+
+## 10， 分布式搜索的原理深入
+```
+分布式搜索的原因也可以先进行略过
+```
+
+## 11，索引的管理
+### 11.1 创建一个索引
+```
+创建一个索引个时候，可以为其添加设置以及映射，方便后续优化搜索。
+格式类似如下：
+PUT /my_index
+{
+    "settings": { ... any settings ... },
+    "mappings": {
+        "type_one": { ... any mappings ... },
+        "type_two": { ... any mappings ... },
+        ...
+    }
+}
+
+
+```
+### 11.2 删除索引
+```
+用以下的请求来 删除索引:
+
+DELETE /my_index
+你也可以这样删除多个索引：
+
+DELETE /index_one,index_two
+DELETE /index_*
+你甚至可以这样删除 全部 索引：
+
+DELETE /_all
+DELETE /*
+
 
 ```
 
+### 11.3 索引设置
+```
+创建一个索引，其中主分片为一个，副分片为0
+curl -XPUT 'localhost:9200/my_temp_index?pretty' -H 'Content-Type: application/json' -d'
+{
+    "settings": {
+        "number_of_shards" :   1,
+        "number_of_replicas" : 0
+    }
+}
+'
+
+设置索引的副分片为1：
+curl -XPUT 'localhost:9200/my_temp_index/_settings?pretty' -H 'Content-Type: application/json' -d'
+{
+    "number_of_replicas": 1
+}
+'
+
+```
+### 11.4，配置分析器
+```
+暂时用不到，后续再进行研究
+```
+
+### 11.5 自定义分析器
+```
+暂时用不到，后续再进行研究
+```
+### 11.6 类型与映射
+```
+暂时用不到，后续再进行研究
+```
+
+### 11.6 根对象
+```
+_type,_index 等的含义
+暂时用不到，后续再进行研究
+```
+
+### 11.7 动态映射
+```
+可以在索引中的文档格式中，有新的字段加入时，为索引设置映射。
+```
+### 11.8 自定义动态映射
+```
+暂时用不到，后续再进行研究
+```
+
+### 11.9 缺省映射
+```
+暂时用不到，后续再进行研究
+```
+
+### 11.10 重新索引你的数据
+```
+暂时用不到，后续再进行研究
+```
+### 11.11 索引别名和零停机（可以重新索引数据）
+```
+暂时用不到，后续再进行研究
+```
+
+## 12 集群内分片原理
+```
+先进行跳过，后续再回过头来看
+```
+
+# 二，高级搜索
+## 1，结构化搜索（过滤操作，不存在评分--相关性比较，效率高）
+### 1.1 精确值查找
+```
+首先往Es 上插入如下数据：
+curl -XPOST 'localhost:9200/my_store/products/_bulk?pretty' -H 'Content-Type: application/json' -d'
+{ "index": { "_id": 1 }}
+{ "price" : 10, "productID" : "XHDK-A-1293-#fJ3" }
+{ "index": { "_id": 2 }}
+{ "price" : 20, "productID" : "KDKE-B-9947-#kL5" }
+{ "index": { "_id": 3 }}
+{ "price" : 30, "productID" : "JODL-X-1937-#pV7" }
+{ "index": { "_id": 4 }}
+{ "price" : 30, "productID" : "QQPX-R-3956-#aD8" }
+'
+
+
+term可以用来查询数字,boolean,日期以及文本
+term 查询数字
+类似如下：
+curl -XGET 'localhost:9200/my_store/products/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+    "query" : {
+        "constant_score" : { 
+            "filter" : {
+                "term" : { 
+                    "price" : 20
+                }
+            }
+        }
+    }
+}
+'
+
+trem 查询文本：
+curl -XGET 'localhost:9200/my_store/products/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+    "query" : {
+        "constant_score" : {
+            "filter" : {
+                "term" : {
+                    "productID" : "XHDK-A-1293-#fJ3"
+                }
+            }
+        }
+    }
+}
+'
+
+这样查询会有问题，
+地不到精确的值，
+原因是因为productID 被分配成了多个token，即字段，
+可以用如下查看索引的分析器：
+curl -XGET 'localhost:9200/my_store/_analyze?pretty' -H 'Content-Type: application/json' -d'
+{
+  "field": "productID",
+  "text": "XHDK-A-1293-#fJ3"
+}
+'
+它被解析为如下：
+{
+  "tokens" : [ {
+    "token" :        "xhdk",
+    "start_offset" : 0,
+    "end_offset" :   4,
+    "type" :         "<ALPHANUM>",
+    "position" :     1
+  }, {
+    "token" :        "a",
+    "start_offset" : 5,
+    "end_offset" :   6,
+    "type" :         "<ALPHANUM>",
+    "position" :     2
+  }, {
+    "token" :        "1293",
+    "start_offset" : 7,
+    "end_offset" :   11,
+    "type" :         "<NUM>",
+    "position" :     3
+  }, {
+    "token" :        "fj3",
+    "start_offset" : 13,
+    "end_offset" :   16,
+    "type" :         "<ALPHANUM>",
+    "position" :     4
+  } ]
+}
+
+索引，创建索引需要重新创建。（把prodectID 匹配成精确查找）
+curl -XDELETE 'localhost:9200/my_store?pretty'
+curl -XPUT 'localhost:9200/my_store?pretty' -H 'Content-Type: application/json' -d'
+{
+    "mappings" : {
+        "products" : {
+            "properties" : {
+                "productID" : {
+                    "type" : "string",
+                    "index" : "not_analyzed" 
+                }
+            }
+        }
+    }
+'
+
+然后再往Es 导入开始的时候的数据
+从新搜索即可。
+
+term 查询
+
+```
+### 1.2 组合过滤器
+```
+布尔过滤器编辑
+一个 bool 过滤器由三部分组成：
+{
+   "bool" : {
+      "must" :     [],
+      "should" :   [],
+      "must_not" : [],
+   }
+}
+must
+所有的语句都 必须（must） 匹配，与 AND 等价。
+must_not
+所有的语句都 不能（must not） 匹配，与 NOT 等价。
+should
+至少有一个语句要匹配，与 OR 等价。
+
+
+curl -XGET 'localhost:9200/my_store/products/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+   "query" : {
+      "filtered" : { 
+         "filter" : {
+            "bool" : {
+              "should" : [
+                 { "term" : {"price" : 20}}, 
+                 { "term" : {"productID" : "XHDK-A-1293-#fJ3"}} 
+              ],
+              "must_not" : {
+                 "term" : {"price" : 30} 
+              }
+           }
+         }
+      }
+   }
+}
+'
+
+嵌套的bool 过滤器
+curl -XGET 'localhost:9200/my_store/products/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+   "query" : {
+      "filtered" : {
+         "filter" : {
+            "bool" : {
+              "should" : [
+                { "term" : {"productID" : "KDKE-B-9947-#kL5"}}, 
+                { "bool" : { 
+                  "must" : [
+                    { "term" : {"productID" : "JODL-X-1937-#pV7"}}, 
+                    { "term" : {"price" : 30}} 
+                  ]
+                }}
+              ]
+           }
+         }
+      }
+   }
+}
+'
+```
+
+### 1.3 查找多个精确值
+```
+terms 查询
+查找多个精确值：
+curl -XGET 'localhost:9200/my_store/products/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+    "query" : {
+        "constant_score" : {
+            "filter" : {
+                "terms" : { 
+                    "price" : [20, 30]
+                }
+            }
+        }
+    }
+}
+'
+
+ term 和 terms 是 必须包含（must contain） 操作，而不是 必须精确相等（must equal exactly） 。
+ 
+ 多字段精确查找
+ # Delete the `my_index` index
+ DELETE /my_index
+ 
+ # Index example docs
+ PUT /my_index/my_type/1
+ {
+   "tags": [
+     "search"
+   ],
+   "tag_count": 1
+ }
+ 
+ PUT /my_index/my_type/2
+ {
+   "tags": [
+     "search",
+     "open_source"
+   ],
+   "tag_count": 2
+ }
+ 
+ # Where tags = "search" only
+ GET /my_index/my_type/_search
+ {
+   "query": {
+     "constant_score": {
+       "filter": {
+         "bool": {
+           "must": [
+             {
+               "term": {
+                 "tags": "search"
+               }
+             },
+             {
+               "term": {
+                 "tag_count": 1
+               }
+             }
+           ]
+         }
+       }
+     }
+   }
+ }
+
+```
+
+### 1.4 范围查找
+```
+# Delete the `my_store` index
+DELETE /my_store
+
+# Index example docs
+POST /my_store/products/_bulk
+{"index":{"_id":1}}
+{"price":10,"productID":"XHDK-A-1293-#fJ3"}
+{"index":{"_id":2}}
+{"price":20,"productID":"KDKE-B-9947-#kL5"}
+{"index":{"_id":3}}
+{"price":30,"productID":"JODL-X-1937-#pV7"}
+{"index":{"_id":4}}
+{"price":30,"productID":"QQPX-R-3956-#aD8"}
+
+
+# Where 20 <= `price` < 40
+GET /my_store/products/_search
+{
+  "query": {
+    "constant_score": {
+      "filter": {
+        "range": {
+          "price": {
+            "gte": 20,
+            "lt": 40
+          }
+        }
+      }
+    }
+  }
+}
+
+# Where `price` > 20
+GET /my_store/products/_search
+{
+  "query": {
+    "constant_score": {
+      "filter": {
+        "range": {
+          "price": {
+            "gt": 20
+          }
+        }
+      }
+    }
+  }
+}
+
+
+时间范围：
+range 查询同样可以应用在日期字段上：
+"range" : {
+    "timestamp" : {
+        "gt" : "2014-01-01 00:00:00",
+        "lt" : "2014-01-07 00:00:00"
+    }
+}
+当使用它处理日期字段时， range 查询支持对 日期计算（date math） 
+进行操作，比方说，如果我们想查找时间戳在过去一小时内的所有文档：
+"range" : {
+    "timestamp" : {
+        "gt" : "now-1h"
+    }
+}
+这个过滤器会一直查找时间戳在过去一个小时内的所有文档，让过滤器作
+为一个时间 滑动窗口（sliding window） 来过滤文档。
+日期计算还可以被应用到某个具体的时间，并非只能是一
+个像 now 这样的占位符。只要在某个日期后加上一个双管符号 (||) 并紧跟一个日期数学表达式就能做到：
+"range" : {
+    "timestamp" : {
+        "gt" : "2014-01-01 00:00:00",
+        "lt" : "2014-01-01 00:00:00||+1M" 
+    }
+}
+
+字典序：
+5, 50, 6, B, C, a, ab, abb, abc, b
+
+如果我们想查找从 a 到 b （不包含）的字符串，同样可以使用 range 查询语法：
+
+"range" : {
+    "title" : {
+        "gte" : "a",
+        "lt" :  "b"
+    }
+}
+```
+### 1.5 处理NULL 值
+```
+curl -XPOST 'localhost:9200/my_index/posts/_bulk?pretty' -H 'Content-Type: application/json' -d'
+{ "index": { "_id": "1"              }}
+{ "tags" : ["search"]                }  
+{ "index": { "_id": "2"              }}
+{ "tags" : ["search", "open_source"] }  
+{ "index": { "_id": "3"              }}
+{ "other_field" : "some data"        }  
+{ "index": { "_id": "4"              }}
+{ "tags" : null                      }  
+{ "index": { "_id": "5"              }}
+{ "tags" : ["search", null]          }
+'
+
+查看字段是否存在：
+curl -XGET 'localhost:9200/my_index/posts/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+    "query" : {
+        "constant_score" : {
+            "filter" : {
+                "exists" : { "field" : "tags" }
+            }
+        }
+    }
+}
+'
+
+
+查看是否缺失
+curl -XGET 'localhost:9200/my_index/posts/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+    "query" : {
+        "constant_score" : {
+            "filter": {
+                "missing" : { "field" : "tags" }
+            }
+        }
+    }
+}
+'
+
+内部对象的缺失会被解析成如下：
+{
+    "exists" : { "field" : "name" }
+}
+实际执行的是：
+
+{
+    "bool": {
+        "should": [
+            { "exists": { "field": "name.first" }},
+            { "exists": { "field": "name.last" }}
+        ]
+    }
+}
+```
+
+### 1.6， 关于缓存
+```
+```
+## 2, 全文搜索（设计相关性和分析，非过滤）
+###2.1, 基于词项检索还是全文检索
+###2.2，匹配查询
+```
+插入数据
+curl -XDELETE 'localhost:9200/my_index?pretty'
+curl -XPUT 'localhost:9200/my_index?pretty' -H 'Content-Type: application/json' -d'
+{ "settings": { "number_of_shards": 1 }}
+'
+curl -XPOST 'localhost:9200/my_index/my_type/_bulk?pretty' -H 'Content-Type: application/json' -d'
+{ "index": { "_id": 1 }}
+{ "title": "The quick brown fox" }
+{ "index": { "_id": 2 }}
+{ "title": "The quick brown fox jumps over the lazy dog" }
+{ "index": { "_id": 3 }}
+{ "title": "The quick brown fox jumps over the quick dog" }
+{ "index": { "_id": 4 }}
+{ "title": "Brown fox brown dog" }
+'
+
+单个词语的匹配：
+curl -XGET 'localhost:9200/my_index/my_type/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+    "query": {
+        "match": {
+            "title": "QUICK!"
+        }
+    }
+}
+'
+```
+### 2.3 多词查询
+```
+查询多个词的匹配
+curl -XGET 'localhost:9200/my_index/my_type/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+    "query": {
+        "match": {
+            "title": "BROWN DOG!"
+        }
+    }
+}
+'
+
+提高精度：
+curl -XGET 'localhost:9200/my_index/my_type/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+    "query": {
+        "match": {
+            "title": {      
+                "query":    "BROWN DOG!",
+                "operator": "and"
+            }
+        }
+    }
+}
+'
+控制精度：
+curl -XGET 'localhost:9200/my_index/my_type/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match": {
+      "title": {
+        "query":                "quick brown dog",
+        "minimum_should_match": "75%"
+      }
+    }
+  }
+}
+'
+
+```
+### 2.4 组合查询
+```
+curl -XGET 'localhost:9200/my_index/my_type/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "bool": {
+      "must":     { "match": { "title": "quick" }},
+      "must_not": { "match": { "title": "lazy"  }},
+      "should": [
+                  { "match": { "title": "brown" }},
+                  { "match": { "title": "dog"   }}
+      ]
+    }
+  }
+}
+'
+控制精度：
+curl -XGET 'localhost:9200/my_index/my_type/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "bool": {
+      "should": [
+        { "match": { "title": "brown" }},
+        { "match": { "title": "fox"   }},
+        { "match": { "title": "dog"   }}
+      ],
+      "minimum_should_match": 2 
+    }
+  }
+}
+'
+
+```
+
+### 2.5 bool匹配的使用
+```
+等价操作
+{
+    "match": { "title": "brown fox"}
+}
+{
+  "bool": {
+    "should": [
+      { "term": { "title": "brown" }},
+      { "term": { "title": "fox"   }}
+    ]
+  }
+}
+
+等价操作：
+{
+    "match": {
+        "title": {
+            "query":    "brown fox",
+            "operator": "and"
+        }
+    }
+}
+{
+  "bool": {
+    "must": [
+      { "term": { "title": "brown" }},
+      { "term": { "title": "fox"   }}
+    ]
+  }
+}
+
+等价操作：
+{
+    "match": {
+        "title": {
+            "query":                "quick brown fox",
+            "minimum_should_match": "75%"
+        }
+    }
+}
+{
+  "bool": {
+    "should": [
+      { "term": { "title": "brown" }},
+      { "term": { "title": "fox"   }},
+      { "term": { "title": "quick" }}
+    ],
+    "minimum_should_match": 2 
+  }
+}
+```
+
+### 2.6  权重处理，那个返回的更重要
+```
+普通的不加权重的情况下：
+curl -XGET 'localhost:9200/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+    "query": {
+        "bool": {
+            "must": {
+                "match": {
+                    "content": { 
+                        "query":    "full text search",
+                        "operator": "and"
+                    }
+                }
+            },
+            "should": [ 
+                { "match": { "content": "Elasticsearch" }},
+                { "match": { "content": "Lucene"        }}
+            ]
+        }
+    }
+}
+'
+
+加了权重的情况下：
+curl -XGET 'localhost:9200/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+    "query": {
+        "bool": {
+            "must": {
+                "match": {  
+                    "content": {
+                        "query":    "full text search",
+                        "operator": "and"
+                    }
+                }
+            },
+            "should": [
+                { "match": {
+                    "content": {
+                        "query": "Elasticsearch",
+                        "boost": 3 
+                    }
+                }},
+                { "match": {
+                    "content": {
+                        "query": "Lucene",
+                        "boost": 2 
+                    }
+                }}
+            ]
+        }
+    }
+}
+'
+```
+### 2.7 控制分析过程
+```
+为字段设置分析器
+curl -XPUT 'localhost:9200/my_index/_mapping/my_type?pretty' -H 'Content-Type: application/json' -d'
+{
+    "my_type": {
+        "properties": {
+            "english_title": {
+                "type":     "string",
+                "analyzer": "english"
+            }
+        }
+    }
+}
+'
+
+查看分析器的分析行为
+curl -XGET 'localhost:9200/my_index/_analyze?pretty' -H 'Content-Type: application/json' -d'
+{
+  "field": "my_type.title",   
+  "text": "Foxes"
+}
+'
+curl -XGET 'localhost:9200/my_index/_analyze?pretty' -H 'Content-Type: application/json' -d'
+{
+  "field": "my_type.english_title",   
+  "text": "Foxes"
+}
+'
+
+分析过程：
+查询自己定义的 analyzer ，否则
+字段映射里定义的 search_analyzer ，否则
+字段映射里定义的 analyzer ，否则
+索引设置中名为 default_search 的分析器，默认为
+索引设置中名为 default 的分析器，默认为
+standard 标准分析器
+```
+
+## 3， 多字段搜索
+### 3.1 多字段查询
+```
+例子1：
+curl -XGET 'localhost:9200/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "bool": {
+      "should": [
+        { "match": { "title":  "War and Peace" }},
+        { "match": { "author": "Leo Tolstoy"   }}
+      ]
+    }
+  }
+}
+'
+
+例子2：
+curl -XGET 'localhost:9200/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "bool": {
+      "should": [
+        { "match": { "title":  "War and Peace" }},
+        { "match": { "author": "Leo Tolstoy"   }},
+        { "bool":  {
+          "should": [
+            { "match": { "translator": "Constance Garnett" }},
+            { "match": { "translator": "Louise Maude"      }}
+          ]
+        }}
+      ]
+    }
+  }
+}
+'
+
+
+语句的有限级，一般上根据权重来处理：
+
+curl -XGET 'localhost:9200/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "bool": {
+      "should": [
+        { "match": { 
+            "title":  {
+              "query": "War and Peace",
+              "boost": 2
+        }}},
+        { "match": { 
+            "author":  {
+              "query": "Leo Tolstoy",
+              "boost": 2
+        }}},
+        { "bool":  { 
+            "should": [
+              { "match": { "translator": "Constance Garnett" }},
+              { "match": { "translator": "Louise Maude"      }}
+            ]
+        }}
+      ]
+    }
+  }
+}
+'
+其中bool 查询的权重为1
+```
 

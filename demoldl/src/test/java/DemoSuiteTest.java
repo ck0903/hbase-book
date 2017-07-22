@@ -100,6 +100,8 @@ public class DemoSuiteTest {
 
     @Test
     public void testDemo00(){
-        System.out.println(new Date());
+        String UID = UUID.randomUUID().toString();
+        System.out.println(UID.replaceAll("-", ""));
+        System.out.println(UID  + ",:" + UID.length());
     }
 }
