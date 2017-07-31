@@ -125,9 +125,7 @@ public class EsApiSuite {
         SearchResponse response = client.prepareSearch("objectinfo")
                 .setTypes("person")
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .setQuery(QueryBuilders.termQuery("name", "小"))
-                .setQuery(QueryBuilders.termQuery("name", "enahals"))
-                .setQuery(QueryBuilders.termQuery("name", "王")).get();
+                .setQuery(QueryBuilders.matchQuery("name", "z小王炸")).get();
         SearchHits hits = response.getHits();
         SearchHit[] searchHits = hits.getHits();
         System.out.println("length:" + searchHits.length);

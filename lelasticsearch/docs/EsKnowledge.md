@@ -2017,3 +2017,5 @@ curl -XGET 'localhost:9200/_search?pretty' -H 'Content-Type: application/json' -
 其中bool 查询的权重为1
 ```
 
+
+
